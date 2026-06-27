@@ -51,7 +51,7 @@ export default function GameCard({ game }) {
           </span>
         </div>
         <Link
-          href={`/analysis/${game.filename}`}
+          href={`/analysis/${encodeURIComponent(game.filename)}`}
           className="btn btn-primary btn-sm"
         >
           Analyze Game
