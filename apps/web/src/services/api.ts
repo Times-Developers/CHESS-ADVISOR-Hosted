@@ -86,12 +86,20 @@ export async function analyzeGame(username: string, filename: string): Promise<a
   return result;
 }
 
-export async function batchAnalyze(username, limit = 5) {
+export async function batchAnalyze(username: string, limit = 50) {
   const res = await apiFetch(
     `${BASE_URL}/api/analyze/${username}/batch?limit=${limit}`,
   );
   if (!res.ok) throw new Error("Batch analysis failed");
   return res.json();
+}
+
+export async function getBatchStatus(username: string, since: string) {
+  const res = await apiFetch(
+    `${BASE_URL}/api/analyze/${username}/batch/status?since=${encodeURIComponent(since)}`,
+  );
+  if (!res.ok) throw new Error("Failed to fetch batch status");
+  return res.json() as Promise<{ pending: number; processing: number; completed: number; failed: number; total: number; done: number }>;
 }
 
 export function getReport(username, limit = 50) {
