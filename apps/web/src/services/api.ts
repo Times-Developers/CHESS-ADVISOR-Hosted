@@ -86,7 +86,7 @@ export async function analyzeGame(username: string, filename: string): Promise<a
   return result;
 }
 
-export async function batchAnalyze(username, limit = 5) {
+export async function batchAnalyze(username: string, limit = 50) {
   const res = await apiFetch(
     `${BASE_URL}/api/analyze/${username}/batch?limit=${limit}`,
   );
