@@ -5,7 +5,7 @@ import Header from "@/components/Header";
 import GameCard from "@/components/GameCard";
 import Loader from "@/components/Loader";
 import { usePlayer } from "@/contexts/PlayerContext";
-import { getStats, batchAnalyze, getBatchStatus, fetchGames } from "@/services/api";
+import { getStats, fetchGames } from "@/services/api";
 import { Play, TrendingUp, TrendingDown, Minus, RefreshCw, ChevronDown, ChevronUp } from "lucide-react";
 
 function MomentumBadge({ momentum }: { momentum: string }) {
@@ -51,8 +51,6 @@ export default function Dashboard() {
   const [realStats, setRealStats] = useState<any>(null);
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [batchAnalyzing, setBatchAnalyzing] = useState(false);
-  const [batchProgress, setBatchProgress] = useState<{ done: number; total: number } | null>(null);
   const [showFetchPanel, setShowFetchPanel] = useState(false);
   const [fetchPlatform, setFetchPlatform] = useState("chess.com");
   const [fetchLimit, setFetchLimit] = useState(10);
@@ -130,45 +128,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleBatchAnalyze = async () => {
-    setBatchAnalyzing(true);
-    setBatchProgress(null);
-    try {
-      const since = new Date().toISOString();
-      const { queued, skipped } = await batchAnalyze(chessUsername, 50);
-      const total = queued + (skipped ?? 0);
-
-      if (queued === 0) {
-        // All games already analyzed — go straight to report
-        router.push("/report");
-        return;
-      }
-
-      setBatchProgress({ done: skipped ?? 0, total });
-
-      const poll = setInterval(async () => {
-        try {
-          const status = await getBatchStatus(chessUsername, since);
-          const done = status.done + (skipped ?? 0);
-          setBatchProgress({ done, total });
-          if (status.pending === 0 && status.processing === 0) {
-            clearInterval(poll);
-            router.push("/report");
-          }
-        } catch {
-          // silently retry
-        }
-      }, 3000);
-    } catch (e) {
-      console.error(e);
-      alert(
-        "Batch analysis failed. Please ensure the backend and Stockfish are running properly.",
-      );
-      setBatchAnalyzing(false);
-      setBatchProgress(null);
-    }
-  };
-
   if (!chessUsername) return null;
 
   return (
@@ -197,34 +156,14 @@ export default function Dashboard() {
               Here&apos;s an overview of your recent performance.
             </p>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
-            <button
-              className="btn btn-primary"
-              onClick={handleBatchAnalyze}
-              disabled={batchAnalyzing}
-              style={{ padding: "12px 24px", fontSize: "15px" }}
-            >
-              <Play size={18} fill="currentColor" />
-              {batchAnalyzing ? "Analyzing..." : "Run Batch Analysis"}
-            </button>
-            {batchProgress && (
-              <div style={{ width: "220px" }}>
-                <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginBottom: "4px", textAlign: "right" }}>
-                  {batchProgress.done} / {batchProgress.total} games analyzed
-                </div>
-                <div style={{ height: "4px", borderRadius: "2px", background: "var(--surface-2)", overflow: "hidden" }}>
-                  <div
-                    style={{
-                      height: "100%",
-                      width: `${batchProgress.total > 0 ? (batchProgress.done / batchProgress.total) * 100 : 0}%`,
-                      background: "var(--accent-color)",
-                      transition: "width 0.4s ease",
-                    }}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          <button
+            className="btn btn-primary"
+            onClick={() => router.push("/batch")}
+            style={{ padding: "12px 24px", fontSize: "15px" }}
+          >
+            <Play size={18} fill="currentColor" />
+            Batch Analysis
+          </button>
         </div>
 
         {loading ? (

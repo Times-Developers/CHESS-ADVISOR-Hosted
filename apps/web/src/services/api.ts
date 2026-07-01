@@ -94,12 +94,26 @@ export async function batchAnalyze(username: string, limit = 50) {
   return res.json();
 }
 
-export async function getBatchStatus(username: string, since: string) {
-  const res = await apiFetch(
-    `${BASE_URL}/api/analyze/${username}/batch/status?since=${encodeURIComponent(since)}`,
-  );
-  if (!res.ok) throw new Error("Failed to fetch batch status");
-  return res.json() as Promise<{ pending: number; processing: number; completed: number; failed: number; total: number; done: number }>;
+export async function createBatchJob(username: string, game_urls: string[]): Promise<any> {
+  const res = await apiFetch(`${BASE_URL}/api/batch`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, game_urls }),
+  });
+  if (!res.ok) throw new Error("Failed to create batch job");
+  return res.json();
+}
+
+export async function getBatchJob(jobId: string): Promise<any> {
+  const res = await apiFetch(`${BASE_URL}/api/batch?jobId=${encodeURIComponent(jobId)}`);
+  if (!res.ok) throw new Error("Failed to fetch batch job");
+  return res.json();
+}
+
+export async function getBatchJobs(username: string): Promise<any[]> {
+  const res = await apiFetch(`${BASE_URL}/api/batch?username=${encodeURIComponent(username)}`);
+  if (!res.ok) return [];
+  return res.json();
 }
 
 export function getReport(username, limit = 50) {
