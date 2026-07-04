@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/components/Header";
 import Loader from "@/components/Loader";
@@ -120,6 +120,8 @@ export default function BatchPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // Track when this polling session started so we can compute ETA
+  const jobStartRef = useRef<number | null>(null);
 
   // Load games from localStorage + check existing jobs on mount
   useEffect(() => {
@@ -175,6 +177,7 @@ export default function BatchPage() {
       const urls = games.map((g: any) => g.filename).filter(Boolean);
       const job = await createBatchJob(chessUsername, urls);
       setActiveJob(job);
+      jobStartRef.current = Date.now();
       startPolling(job.id);
     } catch (e: any) {
       setError(e.message || "Failed to start batch analysis.");
@@ -188,6 +191,30 @@ export default function BatchPage() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
+  // All derived values and hooks must be declared before any early return
+  const result = activeJob?.result;
+  const isRunning = activeJob?.status === "pending" || activeJob?.status === "processing";
+  const isFailed = activeJob?.status === "failed";
+  const isDone = activeJob?.status === "completed" && result;
+
+  // Progress bar values — only meaningful when isRunning
+  const gamesDone   = activeJob?.games_done  ?? 0;
+  const gamesTotal  = activeJob?.games_total ?? 0;
+  const currentGame = activeJob?.current_game ?? null;
+  const progressPct = gamesTotal > 0 ? Math.round((gamesDone / gamesTotal) * 100) : 0;
+
+  // ETA: only show after at least 2 games so the average is meaningful
+  const etaLabel = useMemo(() => {
+    if (!isRunning || gamesDone < 2 || !jobStartRef.current) return null;
+    const elapsed = (Date.now() - jobStartRef.current) / 1000;
+    const avgPerGame = elapsed / gamesDone;
+    const remaining = Math.round(avgPerGame * (gamesTotal - gamesDone));
+    if (remaining <= 0) return null;
+    const m = Math.floor(remaining / 60);
+    const s = remaining % 60;
+    return m > 0 ? `~${m}m ${s}s remaining` : `~${s}s remaining`;
+  }, [isRunning, gamesDone, gamesTotal]);
+
   if (playerLoading || pageLoading) {
     return (
       <>
@@ -198,11 +225,6 @@ export default function BatchPage() {
       </>
     );
   }
-
-  const result = activeJob?.result;
-  const isRunning = activeJob?.status === "pending" || activeJob?.status === "processing";
-  const isFailed = activeJob?.status === "failed";
-  const isDone = activeJob?.status === "completed" && result;
 
   return (
     <>
@@ -250,24 +272,54 @@ export default function BatchPage() {
 
         {/* In-progress state */}
         {isRunning && (
-          <div className="glass-card" style={{ marginBottom: "32px", padding: "32px", textAlign: "center" }}>
-            <div style={{ fontSize: "40px", marginBottom: "16px" }}>⚙️</div>
-            <h2 style={{ fontSize: "18px", fontWeight: "700", margin: "0 0 8px" }}>
-              Analysis in progress
-            </h2>
-            <p style={{ color: "var(--text-secondary)", margin: "0 0 8px", fontSize: "14px" }}>
-              The worker is analyzing your games. This typically takes 1–5 minutes depending on game count.
-            </p>
-            <p style={{ color: "var(--text-secondary)", margin: "0 0 24px", fontSize: "13px" }}>
-              You can close this tab — the analysis runs on the server. Come back to see results.
-            </p>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "10px", background: "rgba(29,193,137,0.08)", border: "1px solid rgba(29,193,137,0.2)", borderRadius: "12px", padding: "10px 20px" }}>
-              <div className="spinner" style={{ width: "16px", height: "16px", border: "2px solid var(--accent-color)", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-              <span style={{ fontSize: "13px", color: "var(--accent-color)", fontWeight: "600" }}>
-                Status: {activeJob.status}
+          <div className="glass-card" style={{ marginBottom: "32px", padding: "24px 28px" }}>
+            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+            {/* Header row */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "18px", flexWrap: "wrap", gap: "8px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <div style={{ width: "14px", height: "14px", border: "2px solid var(--accent-color)", borderTop: "2px solid transparent", borderRadius: "50%", animation: "spin 0.8s linear infinite", flexShrink: 0 }} />
+                <span style={{ fontSize: "15px", fontWeight: "700" }}>Analyzing your games</span>
+              </div>
+              <span style={{ fontSize: "12px", color: "var(--text-secondary)" }}>
+                Safe to close this tab — analysis runs on the server
               </span>
             </div>
-            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+            {/* Current game label */}
+            {currentGame && (
+              <div style={{ fontSize: "12px", color: "var(--text-secondary)", marginBottom: "8px", fontFamily: "monospace", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {currentGame}
+              </div>
+            )}
+
+            {/* Progress bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "8px" }}>
+              <div style={{ flex: 1, height: "8px", borderRadius: "4px", background: "var(--surface-2, rgba(255,255,255,0.06))", overflow: "hidden" }}>
+                <div style={{
+                  height: "100%",
+                  width: gamesTotal > 0 ? `${progressPct}%` : "0%",
+                  background: "var(--accent-color)",
+                  borderRadius: "4px",
+                  transition: "width 0.5s ease",
+                  // indeterminate pulse when we don't have totals yet
+                  animation: gamesTotal === 0 ? "none" : undefined,
+                }} />
+              </div>
+              <span style={{ fontSize: "13px", fontWeight: "700", color: "var(--accent-color)", minWidth: "36px", textAlign: "right", fontVariantNumeric: "tabular-nums" }}>
+                {gamesTotal > 0 ? `${progressPct}%` : "—"}
+              </span>
+            </div>
+
+            {/* Games count + ETA row */}
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px", color: "var(--text-secondary)" }}>
+              <span style={{ fontVariantNumeric: "tabular-nums" }}>
+                {gamesTotal > 0
+                  ? `${gamesDone} of ${gamesTotal} game${gamesTotal !== 1 ? "s" : ""}`
+                  : "Fetching games…"}
+              </span>
+              {etaLabel && <span>{etaLabel}</span>}
+            </div>
           </div>
         )}
 
