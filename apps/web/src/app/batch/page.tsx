@@ -207,7 +207,7 @@ export default function BatchPage() {
   return (
     <>
       <Header />
-      <main className="container animate-fade-in" style={{ paddingTop: "40px", paddingBottom: "80px" }}>
+      <main className="container animate-fade-in page-content-mobile" style={{ paddingTop: "40px", paddingBottom: "80px" }}>
 
         {/* Page header */}
         <div style={{ marginBottom: "32px" }}>
@@ -291,7 +291,7 @@ export default function BatchPage() {
             {/* Summary row */}
             <section>
               <SectionHeader>Summary — {result.total_analyzed} games analyzed</SectionHeader>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(150px, 1fr))", gap: "16px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(150px, 100%), 1fr))", gap: "16px" }}>
                 <StatBox label="Avg Accuracy" value={`${result.average_accuracy}%`} />
                 <StatBox
                   label="Blunders"
@@ -358,7 +358,7 @@ export default function BatchPage() {
                     </p>
                   ) : (
                     <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
-                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "16px" }}>
+                      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(160px, 100%), 1fr))", gap: "16px" }}>
                         <StatBox
                           label="Games w/ Time Pressure"
                           value={`${result.time_analysis.games_with_time_pressure}/${result.time_analysis.games_with_time_data}`}
@@ -438,7 +438,7 @@ export default function BatchPage() {
             {result.phase_performance && (
               <section>
                 <SectionHeader>Accuracy by Phase</SectionHeader>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "16px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(120px, 100%), 1fr))", gap: "16px" }}>
                   {(["opening", "middlegame", "endgame"] as const).map(phase => (
                     <div key={phase} className="glass-card" style={{ textAlign: "center" }}>
                       <div style={{ fontSize: "11px", color: "var(--text-secondary)", textTransform: "capitalize", marginBottom: "6px" }}>{phase}</div>

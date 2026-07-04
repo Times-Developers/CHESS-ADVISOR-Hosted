@@ -366,7 +366,7 @@ export default function PuzzlesPage() {
     return (
       <div style={{ minHeight: "100vh", background: "var(--bg-color)" }}>
         <Header />
-        <div className="container" style={{ paddingTop: "32px", paddingBottom: "48px" }}>
+        <div className="container page-content-mobile" style={{ paddingTop: "32px", paddingBottom: "48px" }}>
           <PuzzleRush username={chessUsername!} onExit={() => setMode("normal")} />
         </div>
       </div>
@@ -398,7 +398,7 @@ export default function PuzzlesPage() {
         />
       )}
 
-      <div className="container" style={{ paddingTop: "32px", paddingBottom: "48px" }}>
+      <div className="container page-content-mobile" style={{ paddingTop: "32px", paddingBottom: "48px" }}>
 
         {/* ── Page header ── */}
         <div className="flex-between" style={{ marginBottom: "24px", flexWrap: "wrap", gap: "12px" }}>
@@ -657,7 +657,7 @@ export default function PuzzlesPage() {
         )}
 
         {/* ── Main grid ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "24px", alignItems: "start" }}>
+        <div className="puzzle-main-grid">
 
           {/* Left — board area */}
           <div>
