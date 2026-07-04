@@ -134,10 +134,19 @@ export default function Dashboard() {
     <>
       <Header />
       <main
-        className="container animate-fade-in"
+        className="container animate-fade-in page-content-mobile"
         style={{ paddingTop: "40px", paddingBottom: "60px" }}
       >
-        <div className="flex-between" style={{ marginBottom: "32px" }}>
+        <div
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "flex-start",
+            gap: "16px",
+            justifyContent: "space-between",
+            marginBottom: "32px",
+          }}
+        >
           <div>
             <div
               style={{
@@ -145,9 +154,10 @@ export default function Dashboard() {
                 alignItems: "center",
                 gap: "12px",
                 marginBottom: "8px",
+                flexWrap: "wrap",
               }}
             >
-              <h1 style={{ fontSize: "32px", margin: 0 }}>
+              <h1 style={{ fontSize: "clamp(22px, 5vw, 32px)", margin: 0 }}>
                 Welcome, {chessUsername}
               </h1>
               {stats?.momentum && <MomentumBadge momentum={stats.momentum} />}
@@ -159,7 +169,7 @@ export default function Dashboard() {
           <button
             className="btn btn-primary"
             onClick={() => router.push("/batch")}
-            style={{ padding: "12px 24px", fontSize: "15px" }}
+            style={{ padding: "12px 24px", fontSize: "15px", flexShrink: 0 }}
           >
             <Play size={18} fill="currentColor" />
             Batch Analysis

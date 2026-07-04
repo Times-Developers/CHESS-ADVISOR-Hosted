@@ -139,7 +139,7 @@ export default function ReportPage() {
     <>
       <Header />
       <main
-        className="container animate-fade-in"
+        className="container animate-fade-in page-content-mobile"
         style={{ paddingTop: "40px", paddingBottom: "60px" }}
       >
         <div
@@ -186,7 +186,7 @@ export default function ReportPage() {
             <div
               style={{
                 display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
+                gridTemplateColumns: "repeat(auto-fit, minmax(min(400px, 100%), 1fr))",
                 gap: "24px",
               }}
             >
@@ -267,7 +267,7 @@ export default function ReportPage() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))",
                     gap: "16px",
                     marginBottom: "32px",
                     padding: "16px",
@@ -344,7 +344,7 @@ export default function ReportPage() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
                     gap: "24px",
                     marginBottom: "32px",
                   }}
@@ -423,7 +423,7 @@ export default function ReportPage() {
                     style={{
                       display: "grid",
                       gridTemplateColumns:
-                        "repeat(auto-fit, minmax(200px, 1fr))",
+                        "repeat(auto-fit, minmax(min(200px, 100%), 1fr))",
                       gap: "16px",
                     }}
                   >
@@ -525,7 +525,7 @@ export default function ReportPage() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))",
                     gap: "24px",
                     alignItems: "center",
                   }}
@@ -801,7 +801,7 @@ export default function ReportPage() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))",
                     gap: "28px",
                   }}
                 >
@@ -930,7 +930,7 @@ export default function ReportPage() {
                 <div
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
                     gap: "24px",
                   }}
                 >
